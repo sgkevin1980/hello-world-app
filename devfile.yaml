@@ -1,0 +1,57 @@
+schemaVersion: 2.2.0
+metadata:
+  name: hello-world-app
+  displayName: Hello World Node.js App
+  description: Simple Hello World web application
+  language: JavaScript
+  projectType: Node.js
+  version: 1.0.0
+
+components:
+  - name: nodejs
+    container:
+      image: registry.redhat.io/devspaces/udi-rhel8:latest
+      memoryLimit: 1Gi
+      memoryRequest: 512Mi
+      cpuLimit: 1000m
+      cpuRequest: 200m
+      mountSources: true
+      endpoints:
+        - name: web-app
+          targetPort: 8080
+          exposure: public
+          protocol: https
+          secure: true
+
+commands:
+  - id: run
+    exec:
+      label: "Run Application"
+      component: nodejs
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: node app.js
+      group:
+        kind: run
+        isDefault: true
+
+  - id: stop
+    exec:
+      label: "Stop Application"
+      component: nodejs
+      commandLine: pkill -f "node app.js"
+      group:
+        kind: run
+
+  - id: test
+    exec:
+      label: "Test Application"
+      component: nodejs
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: curl http://localhost:8080
+      group:
+        kind: test
+
+events:
+  postStart:
+    - run
+
